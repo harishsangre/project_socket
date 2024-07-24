@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket.IO Chat</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let token = '';
+
+      document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.token) {
+            token = data.token;
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('chat').style.display = 'block';
+          } else {
+            alert('Login failed');
+          }
+        });
+      });
+
+      const socket = io();
+
+      document.getElementById('chatForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('chatInput');
+        socket.emit('chat message', input.value);
+        input.value = '';
+      });
+
+      socket.on('chat message', (msg) => {
+        const item = document.createElement('li');
+        item.textContent = msg;
+        document.getElementById('messages').appendChild(item);
+      });
+    });
+  </script>
+</head>
+<body>
+  <div id="login">
+    <form id="loginForm">
+      <input id="username" type="text" placeholder="Username" required />
+      <input id="password" type="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+  </div>
+  <div id="chat" style="display: none;">
+    <ul id="messages"></ul>
+    <form id="chatForm">
+      <input id="chatInput" autocomplete="off" /><button>Send</button>
+    </form>
+  </div>
+</body>
+</html>

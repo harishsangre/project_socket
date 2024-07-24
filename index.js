@@ -11,7 +11,7 @@ app.use(express.json())
 
 // app.use('/api', apiRoutes) 
 app.use('/auth',authRoutes)
-
+ 
 io.on('connect', (socket) => {
     console.log('user connected')
 
